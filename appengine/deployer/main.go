@@ -95,7 +95,7 @@ func main() {
 		}
 	}
 
-	cmd = exec.Command(*gcloud, "app", "deploy")
+	cmd := exec.Command(*gcloud, "app", "deploy")
 	cmd.Dir = project
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr

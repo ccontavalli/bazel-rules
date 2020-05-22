@@ -47,7 +47,7 @@ go_appengine_deploy_path = rule(
             doc = "The app.yaml configuration file to use for gcloud app deploy",
         ),
         "_deployer": attr.label(
-            default = Label("//bazel/deployer"),
+            default = Label("//appengine/deployer"),
             allow_single_file = True,
             executable = True,
             cfg = "host",
