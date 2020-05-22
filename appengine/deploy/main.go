@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -37,24 +36,20 @@ func Copy(dst, src string) error {
 }
 
 func main() {
-	path := flag.String("path", "", "Top level directory where all the repositories are stored (eg, bazel-out/whatever)")
+	path := flag.String("path", "", "Top level directory where all the repositories are stored (eg, appengine/test/test-deploy-dir)")
 	entry := flag.String("entry", "", "Directory project containing your app (eg, github.com/ccontavalli/myapp)")
 	config := flag.String("config", "", "Path to the app.yaml file to use for the deploy")
-	output := flag.String("output", "deploy.log", "Path to the app.yaml file to use for the deploy")
 	gomod := flag.String("gomod", "", "Path to a go.mod file to prepare for deploy")
 	gosum := flag.String("gosum", "", "Path to a go.sum file to prepare for deploy")
-	gcloud := flag.String("gcloud", "/usr/bin/gcloud", "Path to the gcloud binary to use to perform the push")
+	gcloud := flag.String("gcloud", "/usr/bin/gcloud", "Path to the gcloud binary to use")
 	quiet := flag.Bool("quiet", false, "Be more quiet")
 	flag.Parse()
 
-	if *path == "" || *entry == "" || *config == "" {
+	if *entry == "" || *config == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
 
-	if s, err := os.Stat(*path); err != nil || !s.Mode().IsDir() {
-		log.Fatalf("Couldn't enter directory supplied with --path=%s: %s", *path, err)
-	}
 	project := filepath.Join(*path, "src", *entry)
 	if s, err := os.Stat(project); err != nil || !s.Mode().IsDir() {
 		log.Fatalf("Couldn't enter directory supplied with --entry=%s: %s directory caused %s", *entry, project, err)
@@ -80,14 +75,11 @@ func main() {
 		}
 	}
 
-	if *output != "" {
-		ioutil.WriteFile(*output, []byte("output file"), 0600)
-	}
-
 	fmt.Fprintf(os.Stderr, "Deploying '%s' to cloud\n", project)
 
 	if !*quiet {
-		cmd := exec.Command("/usr/bin/find", project)
+		cmd := exec.Command("/usr/bin/find", ".")
+		cmd.Dir = *path
 		cmd.Stdout = os.Stderr
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
@@ -95,11 +87,13 @@ func main() {
 		}
 	}
 
-	cmd := exec.Command(*gcloud, "app", "deploy")
-	cmd.Dir = project
-	cmd.Stdout = os.Stderr
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Fatalf("gcloud failed: %s", err)
+	if *gcloud != "" {
+		cmd := exec.Command(*gcloud, "app", "deploy")
+		cmd.Dir = filepath.Join(project)
+		cmd.Stdout = os.Stderr
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			log.Fatalf("%s failed: %s", *gcloud, err)
+		}
 	}
 }
