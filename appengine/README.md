@@ -16,8 +16,8 @@ This directory provides the `go_appengine_deploy` rule, to deploy your `golang` 
 
        http_archive(
            name = "com_github_ccontavalli_bazel_rules_appengine",
-           strip_prefix = "bazel-rules-v0.0.0",
-           urls = ["https://github.com/ccontavalli/bazel-rules/releases/download/v0.0.0/bazel-rules-v0.0.0.tar.gz"],
+           strip_prefix = "v1",
+           urls = ["https://github.com/ccontavalli/bazel-rules/archive/v1.tar.gz"],
        )
 
 4. Use the rule to define a deploy target. In this target you specify one or more `go` dependencies
