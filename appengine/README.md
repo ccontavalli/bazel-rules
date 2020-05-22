@@ -25,34 +25,34 @@ This directory provides the `go_appengine_deploy` rule, to deploy your `golang` 
    and a few other dependencies. The rule will take care of copying all their dependencies, recursively,
    into a dedicated directory, and then call `gcloud app deploy` from there. For example:
 
-      load("@com_github_ccontavalli_bazel_rules_appengine//appengine:defs.bzl", "go_appengine_deploy")
+       load("@com_github_ccontavalli_bazel_rules_appengine//appengine:defs.bzl", "go_appengine_deploy")
 
-      go_appengine_deploy(
-          # Name of the rule. Go use SCons if you don't know what this is.
-          name = "deploy"
+       go_appengine_deploy(
+           # Name of the rule. Go use SCons if you don't know what this is.
+           name = "deploy"
 
-          # Once all the dependencies have recursively been copied, this is
-          # the directory where `gcloud app deploy` should be called from.
-          # It is the directory where the app.yaml file will be created, and
-          # where the go.mod, go.sum files will be created.
-          entry = "github.com/ccontavalli/whatever",
+           # Once all the dependencies have recursively been copied, this is
+           # the directory where `gcloud app deploy` should be called from.
+           # It is the directory where the app.yaml file will be created, and
+           # where the go.mod, go.sum files will be created.
+           entry = "github.com/ccontavalli/whatever",
 
-          # The app.yaml file to use, see below.
-          # IMPORTANT: the rule makes no attempt to reconcile the go version in
-          # your WORKSPACE with that in the app.yaml file.
-          # If you use go1.13 SDK, make sure you have go113 in the app.yaml file.
-          config = "deploy/app.yaml",
-       
-          # (optional) if you use go modules with bazel (you should!) specify
-          # the path of go.mod and go.sum to have them deployed to cloud.
-          gomod = "go.mod",
-          gosum = "go.sum",
+           # The app.yaml file to use, see below.
+           # IMPORTANT: the rule makes no attempt to reconcile the go version in
+           # your WORKSPACE with that in the app.yaml file.
+           # If you use go1.13 SDK, make sure you have go113 in the app.yaml file.
+           config = "deploy/app.yaml",
+        
+           # (optional) if you use go modules with bazel (you should!) specify
+           # the path of go.mod and go.sum to have them deployed to cloud.
+           gomod = "go.mod",
+           gosum = "go.sum",
 
-          # List of dependencies to deploy. Must be golang targets.
-          # To include data dependencies or similar, have your go targets
-          # depend on them. (hint: it's not the deployment that needs those
-          # files, it's your binary).
-          deps = [":your_go_web_app"],
-      )
+           # List of dependencies to deploy. Must be golang targets.
+           # To include data dependencies or similar, have your go targets
+           # depend on them. (hint: it's not the deployment that needs those
+           # files, it's your binary).
+           deps = [":your_go_web_app"],
+       )
 
 5. Grab some pop corn, and run `bazel run :deploy` to deploy your go binary to GAE.
