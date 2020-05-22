@@ -39,7 +39,7 @@ func Copy(dst, src string) error {
 }
 
 var (
-	packageRe = regexp.MustCompile(`^module\s+(.*?)\n`)
+	moduleRe = regexp.MustCompile(`^module\s+(.*?)\n`)
 )
 
 func main() {
@@ -67,11 +67,11 @@ func main() {
 		if err != nil {
 			log.Fatalf("failed to read %q: %v", *gomod, err)
 		}
-		p := packageRe.FindSubmatch(b)
-		if len(p) < 2 {
+		m := moduleRe.FindSubmatch(b)
+		if len(m) < 2 {
 			log.Fatalf("failed to find module in go.mod")
 		}
-		projectRoot := filepath.Join(*path, "src", strings.TrimSpace(string(p[1])))
+		projectRoot := filepath.Join(*path, "src", strings.TrimSpace(string(m[1])))
 		fmt.Fprintf(os.Stderr, "Copying go.mod to %q\n", projectRoot)
 		dest := filepath.Join(projectRoot, "go.mod")
 		if err := Copy(dest, *gomod); err != nil {
