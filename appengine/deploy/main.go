@@ -4,10 +4,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 func Copy(dst, src string) error {
@@ -35,6 +38,10 @@ func Copy(dst, src string) error {
 	return fdst.Close()
 }
 
+var (
+	packageRe = regexp.MustCompile(`^module\s+(.*?)\n`)
+)
+
 func main() {
 	path := flag.String("path", "", "Top level directory where all the repositories are stored (eg, appengine/test/test-deploy-dir)")
 	entry := flag.String("entry", "", "Directory project containing your app (eg, github.com/ccontavalli/myapp)")
@@ -56,15 +63,26 @@ func main() {
 	}
 
 	if *gomod != "" {
-		dest := filepath.Join(project, "go.mod")
-		if err := Copy(dest, *gomod); err != nil {
-			log.Fatalf("Couldn't copy %s - supplied with -gomod - to %s: %s", *gomod, dest, err)
+		b, err := ioutil.ReadFile(*gomod)
+		if err != nil {
+			log.Fatalf("failed to read %q: %v", *gomod, err)
 		}
-	}
-	if *gosum != "" {
-		dest := filepath.Join(project, "go.sum")
-		if err := Copy(dest, *gosum); err != nil {
-			log.Fatalf("Couldn't copy %s - supplied with -gosum - to %s: %s", *gosum, dest, err)
+		p := packageRe.FindSubmatch(b)
+		if len(p) < 2 {
+			log.Fatalf("failed to find module in go.mod")
+		}
+		projectRoot := filepath.Join(*path, "src", strings.TrimSpace(string(p[1])))
+		fmt.Fprintf(os.Stderr, "Copying go.mod to %q\n", projectRoot)
+		dest := filepath.Join(projectRoot, "go.mod")
+		if err := Copy(dest, *gomod); err != nil {
+			log.Fatalf("Couldn't copy %s - supplied with -gomod - to %s: %s", *gomod, projectRoot, err)
+		}
+		if *gosum != "" {
+			fmt.Fprintf(os.Stderr, "Copying go.sum to %q\n", projectRoot)
+			dest := filepath.Join(projectRoot, "go.sum")
+			if err := Copy(dest, *gosum); err != nil {
+				log.Fatalf("Couldn't copy %s - supplied with -gosum - to %s: %s", *gosum, projectRoot, err)
+			}
 		}
 	}
 
@@ -75,7 +93,7 @@ func main() {
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "Deploying '%s' to cloud\n", project)
+	fmt.Fprintf(os.Stderr, "Deploying %q to cloud\n", project)
 
 	if !*quiet {
 		cmd := exec.Command("/usr/bin/find", ".")
