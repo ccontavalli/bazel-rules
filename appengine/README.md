@@ -16,8 +16,8 @@ This directory provides the `go_appengine_deploy` rule, to deploy your `golang` 
 
        http_archive(
            name = "com_github_ccontavalli_bazel_rules_appengine",
-           strip_prefix = "bazel-rules-3",
-           urls = ["https://github.com/ccontavalli/bazel-rules/archive/v3.tar.gz"],
+           strip_prefix = "bazel-rules-4",
+           urls = ["https://github.com/ccontavalli/bazel-rules/archive/v4.tar.gz"],
        )
 
 4. Use the rule to define a deploy target. In this target you specify one or more `go` dependencies
@@ -52,6 +52,12 @@ This directory provides the `go_appengine_deploy` rule, to deploy your `golang` 
            # depend on them. (hint: it's not the deployment that needs those
            # files, it's your binary).
            deps = [":your_go_web_app"],
+
+           # This is entirely optional. Adds extra flags to 'gcloud app deploy'.
+           # In this example, it adds '--project' to explicitly specify a project.
+           extra = [
+               "--project=exciting-gae-project",
+           ],
        )
 
 5. Grab some pop corn, and run `bazel run :deploy` to deploy your go binary to GAE.

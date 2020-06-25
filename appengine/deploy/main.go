@@ -49,6 +49,7 @@ func main() {
 	gomod := flag.String("gomod", "", "Path to a go.mod file to prepare for deploy")
 	gosum := flag.String("gosum", "", "Path to a go.sum file to prepare for deploy")
 	gcloud := flag.String("gcloud", "/usr/bin/gcloud", "Path to the gcloud binary to use")
+	extra := flag.String("extra", "", "Extra flags to pass to gcloud")
 	quiet := flag.Bool("quiet", false, "Be more quiet")
 	flag.Parse()
 
@@ -106,7 +107,13 @@ func main() {
 	}
 
 	if *gcloud != "" {
-		cmd := exec.Command(*gcloud, "app", "deploy")
+		*extra = strings.TrimSpace(*extra)
+		var cmd *exec.Cmd
+		if *extra != "" {
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("%s app deploy %s", *gcloud, *extra))
+		} else {
+			cmd = exec.Command(*gcloud, "app", "deploy")
+		}
 		cmd.Dir = filepath.Join(project)
 		cmd.Stdout = os.Stderr
 		cmd.Stderr = os.Stderr

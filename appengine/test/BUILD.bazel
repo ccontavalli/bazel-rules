@@ -4,6 +4,9 @@ go_appengine_deploy(
     name = "test-deploy",
     config = "app.yaml",
     entry = "github.com/ccontavalli/bazel-rules/appengine/deploy",
+    extra = [
+        "--project='FOO'"
+    ],
     deps = [
         "//appengine/deploy",
     ],

@@ -16,19 +16,8 @@ def _go_appengine_deploy_path_impl(ctx):
     if ctx.attr.gosum:
         args.append("-gosum=" + ctx.file.gosum.path)
         inputs.append(ctx.file.gosum)
-
-    #ctx.actions.run(
-    #    mnemonic = "deploy",
-    #    executable = ctx.executable._deploy,
-    #    inputs = [gp.gopath_file, config] + inputs,
-    #    arguments = [
-    #        "-config=" + config.path,
-    #        "-entry=" + ctx.attr.entry,
-    #        "-path=" + gp.gopath_file.path,
-    #        "-output=" + appyaml.path,
-    #    ] + args,
-    #    outputs = outputs + [appyaml],
-    #)
+    if ctx.attr.extra:
+        args.append("-extra='" + " ".join([s.replace("'", "'\\''") for s in ctx.attr.extra]) + "'")
 
     gcloud = ctx.actions.declare_file("gcloud.sh")
     ctx.actions.expand_template(
@@ -42,10 +31,6 @@ def _go_appengine_deploy_path_impl(ctx):
         is_executable = True,
     )
 
-    #files = [gp.gopath_file]
-    #for package in gp.packages:
-    #    files.extend(package.srcs)
-    #    files.extend(package.data)
     return [DefaultInfo(executable = gcloud, runfiles = ctx.runfiles(inputs))]
 
 go_appengine_deploy_path = rule(
@@ -78,6 +63,10 @@ go_appengine_deploy_path = rule(
             allow_single_file = True,
             mandatory = True,
             doc = "The app.yaml configuration file to use for gcloud app deploy",
+        ),
+	"extra": attr.string_list(
+            allow_empty = True,
+            doc = "Extra flags to pass to gcloud",            
         ),
         "_deploy": attr.label(
             default = Label("//appengine/deploy"),
