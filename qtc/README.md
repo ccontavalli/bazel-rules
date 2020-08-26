@@ -31,7 +31,7 @@ To use the bazel rules here:
 
 2. Use the rules. In your `BUILD.bazel` file, use something like:
 
-       load("//bazel:qtc.bzl", "qtpl_go_library")
+       load("@com_github_ccontavalli_bazel_rles//qtc:defs.bzl", "qtpl_go_library")
                
        qtpl_go_library(
            name = "templates",
