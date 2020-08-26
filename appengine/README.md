@@ -15,7 +15,7 @@ This directory provides the `go_appengine_deploy` rule, to deploy your `golang` 
 3. Configure your `WORKSPACE` to use this repository:
 
        http_archive(
-           name = "com_github_ccontavalli_bazel_rules_appengine",
+           name = "com_github_ccontavalli_bazel_rules",
            strip_prefix = "bazel-rules-4",
            urls = ["https://github.com/ccontavalli/bazel-rules/archive/v4.tar.gz"],
        )
@@ -24,7 +24,7 @@ This directory provides the `go_appengine_deploy` rule, to deploy your `golang` 
    and a few other dependencies. The rule will take care of copying all their dependencies, recursively,
    into a dedicated directory, and then call `gcloud app deploy` from there. For example:
 
-       load("@com_github_ccontavalli_bazel_rules_appengine//appengine:defs.bzl", "go_appengine_deploy")
+       load("@com_github_ccontavalli_bazel_rules//appengine:defs.bzl", "go_appengine_deploy")
 
        go_appengine_deploy(
            # Name of the rule. Go use SCons if you don't know what this is.
